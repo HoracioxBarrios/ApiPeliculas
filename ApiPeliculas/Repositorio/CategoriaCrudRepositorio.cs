@@ -21,12 +21,12 @@ namespace ApiPeliculas.Repositorio
 
         public ICollection<Categoria> GetCategorias()
         {
-            throw new NotImplementedException();
+            return _bd.Categorias.OrderBy(c => c.Nombre).ToList();
         }
 
         public Categoria GetCategoria(int categoriaId)
         {
-            throw new NotImplementedException();
+            return _bd.Categorias.FirstOrDefault(c => c.Id == categoriaId);
         }
 
         public bool EditarCategoria(Categoria categoria)
@@ -46,17 +46,21 @@ namespace ApiPeliculas.Repositorio
 
         public bool ExisteCategoria(int Id)
         {
-            throw new NotImplementedException();
+            return _bd.Categorias.Any((c)=> c.Id == Id);
         }
 
         public bool ExisteCategoria(string nombre)
         {
-            throw new NotImplementedException();
+            bool existe =_bd.Categorias.Any(
+                (c)=> c.Nombre.ToLower().Trim() == nombre.ToLower().Trim());
+            return existe;
         }
 
         public bool Guardar()
         {
-            throw new NotImplementedException();
+            //Creo que deberiamos manejar excepciones aca
+            bool seGuardo = (_bd.SaveChanges() > 0) ? true : false;
+            return seGuardo;
         }
     }
 }
