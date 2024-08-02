@@ -16,7 +16,9 @@ namespace ApiPeliculas.Repositorio
 
         public bool CrearCategoria(Categoria categoria)
         {
-            throw new NotImplementedException();
+            categoria.FechaCreacion = DateTime.Now;
+            _bd.Categorias.Add(categoria);
+            return Guardar();
         }
 
         public ICollection<Categoria> GetCategorias()
@@ -57,8 +59,7 @@ namespace ApiPeliculas.Repositorio
         }
 
         public bool Guardar()
-        {
-            //Creo que deberiamos manejar excepciones aca
+        {          
             bool seGuardo = (_bd.SaveChanges() > 0) ? true : false;
             return seGuardo;
         }
