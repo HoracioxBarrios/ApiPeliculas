@@ -22,7 +22,42 @@ namespace ApiPeliculas.Controllers
             _mapper = maper;
         }
 
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public IActionResult CrearCategoria([FromBody] CrearCategoriaDto crearCategoriaDto) 
+        {
+            IActionResult resultado = null;
 
+            if(!ModelState.IsValid) //si no es valido el estado
+            {
+                resultado = BadRequest(ModelState); // devuelve un BadRequestObjectResult que a la vez es un IActionResult
+            }
+
+            if(crearCategoriaDto == null) 
+            { 
+                resultado = NotFound(ModelState);
+            }
+
+            if (_ctRepo.ExisteCategoria(crearCategoriaDto.Nombre)) 
+            {
+                ModelState.AddModelError("", "La Categoria ya existe.");
+                resultado = StatusCode(404, ModelState);
+            }
+
+            Categoria categoria = _mapper.Map<Categoria>(crearCategoriaDto);
+            if (_ctRepo.CrearCategoria(categoria))
+            {
+                ModelState.AddModelError("", $"Algo salio mal.{categoria.Nombre}");
+                resultado = StatusCode(404, ModelState);
+            }
+            resultado = CreatedAtRoute(
+                "GetCategoria", new {categoriaId = categoria.Id}, categoria);
+
+            return resultado;
+        }
 
 
         [HttpGet]
@@ -34,7 +69,7 @@ namespace ApiPeliculas.Controllers
 
             List<CategoriaDto> listaCategoriasDto = new List<CategoriaDto>();// Vamos a exponer el Dto en lugar de la Lista de Categorias directamente
 
-            foreach (var categoria in listaCategorias)
+            foreach (Categoria categoria in listaCategorias)
             {
                 listaCategoriasDto.Add(_mapper.Map<CategoriaDto>(categoria));
             }
@@ -50,15 +85,18 @@ namespace ApiPeliculas.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetCategoria(int idCategoriaABuscar)
         {
+            IActionResult resultado = null;
             Categoria categoriaEncontrada = _ctRepo.GetCategoria(idCategoriaABuscar);
 
             if (categoriaEncontrada == null)
             {
-                return NotFound();
+                resultado = NotFound();
             }
 
             CategoriaDto CategoriaEncontradaDto = _mapper.Map<CategoriaDto>(categoriaEncontrada);
-            return Ok(CategoriaEncontradaDto);
+
+            resultado = Ok(CategoriaEncontradaDto);
+            return resultado;
         }
     }   
     
