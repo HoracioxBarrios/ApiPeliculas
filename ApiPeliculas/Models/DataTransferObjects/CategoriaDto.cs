@@ -4,6 +4,7 @@ namespace ApiPeliculas.Models.DataTransferObjects
 {
     //Esta entidad se sencarga de: Leer los registros,para leer un registro individual y  Actualizar.
     //Otra entidad se encargará de Crear (porque para Crear solo neesitamos la Property Nombre)
+    //Esta es la entidad que se va a exponer en lugar del modelo Categoria
     public class CategoriaDto
     {
         public int Id { get; set; }
