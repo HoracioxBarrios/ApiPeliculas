@@ -7,7 +7,7 @@ namespace ApiPeliculas.Repositorio.IRepositorio
         bool CrearCategoria(Categoria categoria);
         ICollection<Categoria> GetCategorias();
         Categoria GetCategoria(int categoriaId);
-        bool EditarCategoria(Categoria categoria);
+        bool ActualizarCategoria(Categoria categoria);
         bool BorrarCategoria(Categoria categoriaABorrar);
 
         bool ExisteCategoria(int Id);

@@ -89,8 +89,8 @@ namespace ApiPeliculas.Controllers
         {
             List<Categoria> listaCategorias = _ctRepo.GetCategorias().ToList(); //Lista Original (Que no se expone)
             //Si quisiera mostrar las categorias aca deberia ordenarlas antes de mapearlas a la class que se va a EXPONER
-            //listaCategorias = listaCategorias.OrderBy(c => c.Id).ToList();
-            listaCategorias = listaCategorias.OrderBy(c => c.Nombre).ToList();
+            listaCategorias = listaCategorias.OrderBy(c => c.Id).ToList();
+            //listaCategorias = listaCategorias.OrderBy(c => c.Nombre).ToList();
 
             List<CategoriaDto> listaCategoriasDto = new List<CategoriaDto>();// Vamos a exponer el Dto en lugar de la Lista de Categorias directamente
 
@@ -102,6 +102,33 @@ namespace ApiPeliculas.Controllers
         }
 
 
+        [HttpPatch("{idCategoriaABuscar:int}", Name = "ActualizarPatchCategoria")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public IActionResult ActualizarPatchCategoria(
+            int idCategoriaABuscar, [FromBody] CategoriaDto categoriaDto)
+        {
+
+            if (!ModelState.IsValid) //si no es valido el estado
+            {
+                return BadRequest(ModelState); // devuelve un BadRequestObjectResult que a la vez es un IActionResult
+            }
+
+            if (categoriaDto == null || idCategoriaABuscar != categoriaDto.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var categoria = _mapper.Map<Categoria>(categoriaDto);
+
+            if (!_ctRepo.ActualizarCategoria(categoria))
+            {
+                ModelState.AddModelError("", $"Algo salio mal Actualizando el registro.{categoria.Nombre}");
+                return StatusCode(500, ModelState);
+            }
+            return NoContent();
+        }
 
 
     }   

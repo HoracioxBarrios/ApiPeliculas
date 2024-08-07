@@ -31,7 +31,7 @@ namespace ApiPeliculas.Repositorio
             return _bd.Categorias.FirstOrDefault(c => c.Id == categoriaId);
         }
 
-        public bool EditarCategoria(Categoria categoria)
+        public bool ActualizarCategoria(Categoria categoria)
         {
             categoria.FechaCreacion = DateTime.Now;
             _bd.Categorias.Update(categoria);
