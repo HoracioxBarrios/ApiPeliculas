@@ -22,60 +22,43 @@ namespace ApiPeliculas.Controllers
             _mapper = maper;
         }
 
+
+
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult CrearCategoria([FromBody] CrearCategoriaDto crearCategoriaDto) 
+        public IActionResult CrearCategoria([FromBody] CrearCategoriaDto crearCategoriaDto)
         {
-            IActionResult resultado = null;
 
-            if(!ModelState.IsValid) //si no es valido el estado
+            if (!ModelState.IsValid) //si no es valido el estado
             {
-                resultado = BadRequest(ModelState); // devuelve un BadRequestObjectResult que a la vez es un IActionResult
+                return BadRequest(ModelState); // devuelve un BadRequestObjectResult que a la vez es un IActionResult
             }
 
-            if(crearCategoriaDto == null) 
-            { 
-                resultado = NotFound(ModelState);
+            if (crearCategoriaDto == null)
+            {
+                return NotFound(ModelState);
             }
 
-            if (_ctRepo.ExisteCategoria(crearCategoriaDto.Nombre)) 
+            if (_ctRepo.ExisteCategoria(crearCategoriaDto.Nombre))
             {
                 ModelState.AddModelError("", "La Categoria ya existe.");
-                resultado = StatusCode(404, ModelState);
+                return StatusCode(404, ModelState);
             }
 
-            Categoria categoria = _mapper.Map<Categoria>(crearCategoriaDto);
-            if (_ctRepo.CrearCategoria(categoria))
+            var categoria = _mapper.Map<Categoria>(crearCategoriaDto);
+
+            if (!_ctRepo.CrearCategoria(categoria))
             {
                 ModelState.AddModelError("", $"Algo salio mal.{categoria.Nombre}");
-                resultado = StatusCode(404, ModelState);
+                return StatusCode(404, ModelState);
             }
-            resultado = CreatedAtRoute(
-                "GetCategoria", new {categoriaId = categoria.Id}, categoria);
-
-            return resultado;
+            IActionResult result = CreatedAtRoute("GetCategoria", new { idCategoriaABuscar = categoria.Id }, categoria);
+            return result;
         }
-
-
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult GetCayegorias()
-        {
-            List<Categoria> listaCategorias = _ctRepo.GetCategorias().ToList();
-
-            List<CategoriaDto> listaCategoriasDto = new List<CategoriaDto>();// Vamos a exponer el Dto en lugar de la Lista de Categorias directamente
-
-            foreach (Categoria categoria in listaCategorias)
-            {
-                listaCategoriasDto.Add(_mapper.Map<CategoriaDto>(categoria));
-            }
-            return Ok(listaCategoriasDto);
-        }
-
 
 
         [HttpGet("{idCategoriaABuscar:int}", Name = "GetCategoria")]
@@ -98,6 +81,29 @@ namespace ApiPeliculas.Controllers
             resultado = Ok(CategoriaEncontradaDto);
             return resultado;
         }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult GetCategorias()
+        {
+            List<Categoria> listaCategorias = _ctRepo.GetCategorias().ToList(); //Lista Original (Que no se expone)
+            //Si quisiera mostrar las categorias aca deberia ordenarlas antes de mapearlas a la class que se va a EXPONER
+            //listaCategorias = listaCategorias.OrderBy(c => c.Id).ToList();
+            listaCategorias = listaCategorias.OrderBy(c => c.Nombre).ToList();
+
+            List<CategoriaDto> listaCategoriasDto = new List<CategoriaDto>();// Vamos a exponer el Dto en lugar de la Lista de Categorias directamente
+
+            foreach (Categoria categoria in listaCategorias)
+            {
+                listaCategoriasDto.Add(_mapper.Map<CategoriaDto>(categoria));
+            }
+            return Ok(listaCategoriasDto);
+        }
+
+
+
+
     }   
     
 }

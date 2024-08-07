@@ -12,8 +12,8 @@ namespace ApiPeliculas.PeliculasMapper
             // Configura el mapeo bidireccional entre Categoria y CategoriaDto,
             // permitiendo la conversión de Categoria a CategoriaDto y viceversa.
             CreateMap<Categoria, CategoriaDto>().ReverseMap();
-            //
-            CreateMap<Categoria, CategoriaDto>().ReverseMap();
+            
+            CreateMap<Categoria, CrearCategoriaDto>().ReverseMap();
         }
     }
 }
