@@ -106,6 +106,8 @@ namespace ApiPeliculas.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult ActualizarPatchCategoria(
             int idCategoriaABuscar, [FromBody] CategoriaDto categoriaDto)
         {
@@ -120,6 +122,11 @@ namespace ApiPeliculas.Controllers
                 return BadRequest(ModelState);
             }
 
+            Categoria categoriaExistente = _ctRepo.GetCategoria(idCategoriaABuscar);
+            if (categoriaExistente == null)
+            {
+                return NotFound($"No se Encontro la Categoria con Id {categoriaDto.Id}");
+            }
             var categoria = _mapper.Map<Categoria>(categoriaDto);
 
             if (!_ctRepo.ActualizarCategoria(categoria))
@@ -131,6 +138,64 @@ namespace ApiPeliculas.Controllers
         }
 
 
+        [HttpPut("{idCategoriaABuscar:int}", Name = "ActualizarPutCategoria")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public IActionResult ActualizarPutCategoria(
+           int idCategoriaABuscar, [FromBody] CategoriaDto categoriaDto) 
+        {
+
+            if (!ModelState.IsValid) //si no es valido el estado
+            {
+                return BadRequest(ModelState); // devuelve un BadRequestObjectResult que a la vez es un IActionResult
+            }
+
+            if (categoriaDto == null || idCategoriaABuscar != categoriaDto.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            Categoria categoriaExistente = _ctRepo.GetCategoria(idCategoriaABuscar);
+            if (categoriaExistente == null)
+            {
+                return NotFound($"No se Encontro la Categoria con Id {categoriaDto.Id}");
+            }
+            var categoria = _mapper.Map<Categoria>(categoriaDto);
+
+            if (!_ctRepo.ActualizarCategoria(categoria))
+            {
+                ModelState.AddModelError("", $"Algo salio mal Actualizando el registro.{categoria.Nombre}");
+                return StatusCode(500, ModelState);
+            }
+            return NoContent();
+        }
+
+
+        [HttpDelete("{idCategoriaABuscar:int}", Name = "DeleteCategoria")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public IActionResult BorraCategoria(
+        int idCategoriaABuscar)
+        {
+            if (!_ctRepo.ExisteCategoria(idCategoriaABuscar))
+            {
+                return NotFound($"No se encontro la {idCategoriaABuscar}");
+            }
+            Categoria categoria = _ctRepo.GetCategoria(idCategoriaABuscar);
+
+            if (!_ctRepo.BorrarCategoria(categoria))
+            {
+                ModelState.AddModelError("", $"Algo salio mal Eliminando el registro.{categoria.Nombre}");
+                return StatusCode(500, ModelState);
+            }
+            return NoContent();
+        }
     }   
     
 }
